@@ -42,7 +42,7 @@ def lineas_wordlist(wordlist):
             n_lineas += 1
 
 
-def ataque_threads(wordlist, usuario, num_threads, timeout, verbose):
+def ataque_threads(wordlist, usuario, num_threads, timeout):
     # Hay definir el array antes de usarlo
     threads = []
     i = 0
@@ -55,7 +55,7 @@ def ataque_threads(wordlist, usuario, num_threads, timeout, verbose):
                 # Quita el salto de linea
                 password = password.strip()
                 # Crea el thread
-                thread = threading.Thread(target=probar_contraseña, args=(password, usuario, timeout, verbose, i))
+                thread = threading.Thread(target=probar_contraseña, args=(password, usuario, timeout, i))
                 # Añade el thread al array
                 threads.append(thread)
 
@@ -83,7 +83,7 @@ def ataque_threads(wordlist, usuario, num_threads, timeout, verbose):
         print(f'Error: {e} al intentar abrir el archivo "{wordlist}".')
         
 
-def probar_contraseña(password, usuario, timeout, verbose, index):
+def probar_contraseña(password, usuario, timeout, index):
     # Si ya se encontró la contraseña, salir del thread
     global encontrada
     if encontrada:
@@ -122,11 +122,7 @@ if __name__ == "__main__":
     # Argumento -t, timeout
     parser.add_argument('-t', '--timeout', type=float, help="Timeout", default=0.1, required=False)
 
-    #Argumento -v, verbosidad
-    parser.add_argument('-v', '--verbose', action='store_true', help="Timeout", required=False)
-
-
     args = parser.parse_args()
     show_info(args.user, args.wordlist, args.threads, args.timeout)
     lineas_wordlist(args.wordlist)
-    ataque_threads(args.wordlist, args.user, args.threads, args.timeout, args.verbose)
+    ataque_threads(args.wordlist, args.user, args.threads, args.timeout)
