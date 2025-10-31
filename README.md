@@ -5,15 +5,11 @@ A python script to escalate to a desired used using bruteforce
 main.py [-h] -w WORDLIST -u USER [-T THREADS] [-t TIMEOUT] [-v]
 
 options:
-  -h, --help            show this help message and exit
-  -w, --wordlist WORDLIST
-                        Ruta del diccionario de contraseñas
-  -u, --user USER       Usuario para probar contraseñas
-  -T, --threads THREADS
-                        Threads a usar, por defecto 8
-  -t, --timeout TIMEOUT
-                        Timeout
-  -v, --verbose         Timeout
+  -h, --help                show this help message and exit
+  -w, --wordlist WORDLIST   Ruta del diccionario de contraseñas
+  -u, --user USER           Usuario para probar contraseñas
+  -T, --threads THREADS     Threads a usar, por defecto 8
+  -t, --timeout TIMEOUT     Timeout
 
 example: 
 ```shell
