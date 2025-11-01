@@ -85,7 +85,7 @@ def ataque_threads(wordlist, usuario, num_threads, timeout):
                     t.start()
                 for t in threads:
                     t.join() 
-            print(f"[i] Attack finished in {time.time() - inicio:.2f}. No passwords found :(, you can try with another wordlist.")
+            print(f"[i] Attack finished in {time.time() - inicio:.2f}s. No passwords found :(")
                 
     # Si da otro error tmbn lo dice
     except Exception as e:
@@ -103,8 +103,8 @@ def probar_contraseña(password, usuario, timeout, index):
             
             tiempo_transcurrido = time.time() - inicio
             velocidad = index / tiempo_transcurrido
-            # /r para volver al inicio de la línea y sobrescribir \033[2F para mover cursor arriba 3 lineas y \033[K para limpiar la línea
-            # \033[2B para bajar 3 lineas y \033[0G para volver al inicio de la línea
+            # /r para volver al inicio de la línea y sobrescribir \033[3F para mover cursor arriba 3 lineas y \033[K para limpiar la línea
+            # \033[3B para bajar 3 lineas y \033[0G para volver al inicio de la línea
             print(f"\r\033[3F\033[K[i] Trying password {index}/{n_lineas}: {password}\033[3B\033[0G", end="", flush=True)
             print(f"\r\033[2F\033[K[i] Velocity: {velocidad:.2f}/s \033[2B\033[0G", end="", flush=True)
             
@@ -116,8 +116,7 @@ def probar_contraseña(password, usuario, timeout, index):
         # Si el comando fue exitoso, la contraseña es correcta
         if result.returncode == 0:
             encontrada = True
-            print(f"Contraseña encontrada: {password} en {index} intentos. Tiempo total: {time.time() - inicio:.2f} segundos.")
-            #print(f"\r\033[KContraseña encontrada: {password} en {index} intentos. Tiempo total: {time.time() - inicio:.2f} segundos.\033[0G", end="", flush=True)
+            print(f"Found password: {password} in {index} trys. Total time: {time.time() - inicio:.2f}s.")
             os._exit(1)  # Salir de todos los threads cuando se encuentra la contraseña
     # Si ocurre un error (como timeout), simplemente pasa
     except:
